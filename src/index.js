@@ -48,6 +48,8 @@ type Props = {
   renderPlaceholder?: SlateNodeProps => ?React.Node,
   className?: string,
   style?: Object,
+  onFocus?: () => *,
+  onBlur?: () => *,
 };
 
 type State = {
@@ -123,6 +125,18 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
     // Force re-render to show ToC (<Content />)
     this.setState({ editorLoaded: true });
   };
+
+  focus () {
+    if (this.editor) {
+      this.editor.focus();
+    }
+  }
+
+  blur () {
+    if (this.editor) {
+      this.editor.blur();
+    }
+  }
 
   value = (): string => {
     return Markdown.serialize(this.state.editorValue);
@@ -270,6 +284,8 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
       className,
       style,
       dark,
+      onFocus,
+      onBlur,
     } = this.props;
 
     const theme = this.props.theme || (dark ? darkTheme : lightTheme);
@@ -324,6 +340,8 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
               spellCheck={!readOnly}
               uploadImage={uploadImage}
               pretitle={pretitle}
+              onFocus={onFocus}
+              onBlur={onBlur}
             />
           </React.Fragment>
         </ThemeProvider>
