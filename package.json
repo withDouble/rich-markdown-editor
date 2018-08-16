@@ -1,15 +1,15 @@
 {
-  "name": "rich-markdown-editor",
+  "name": "@withdouble/rich-markdown-editor",
   "description": "A rich text editor with Markdown shortcuts built on Slate",
   "version": "4.0.0",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "yarn eslint src",
+    "lint": "eslint src",
     "start": "webpack-serve --config example/webpack.config.js --content example/dist",
     "build": "babel src/ -d lib/",
-    "prepublish": "yarn build"
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "@tommoor/slate-drop-or-paste-images": "^0.8.1",
@@ -71,7 +71,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/outline/rich-markdown-editor.git"
+    "url": "git+https://github.com/withDouble/rich-markdown-editor.git"
   },
   "keywords": [
     "editor",
@@ -82,7 +82,7 @@
   ],
   "author": "Tom Moor <tom.moor@gmail.com>",
   "bugs": {
-    "url": "https://github.com/outline/rich-markdown-editor/issues"
+    "url": "https://github.com/withDouble/rich-markdown-editor/issues"
   },
-  "homepage": "https://github.com/outline/rich-markdown-editor#readme"
+  "homepage": "https://github.com/withDouble/rich-markdown-editor#readme"
 }
