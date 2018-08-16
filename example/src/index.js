@@ -16,6 +16,7 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
   state = {
     readOnly: false,
     dark: false,
+    inlineToolbar: true,
   };
 
   handleToggleReadOnly = () => {
@@ -24,6 +25,10 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
 
   handleToggleDark = () => {
     this.setState({ dark: !this.state.dark });
+  };
+
+  handleToggleInlineToolbar = () => {
+    this.setState({ inlineToolbar: !this.state.inlineToolbar });
   };
 
   handleChange = debounce(value => {
@@ -40,10 +45,16 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
           <button type="button" onClick={this.handleToggleDark}>
             {this.state.dark ? "Light Theme" : "Dark Theme"}
           </button>
+          <button type="button" onClick={this.handleToggleInlineToolbar}>
+            {this.state.inlineToolbar
+              ? "Disable Inline Toolbar"
+              : "Enable Inline Toolbar"}
+          </button>
         </p>
         <Editor
           readOnly={this.state.readOnly}
           defaultValue={defaultValue}
+          inlineToolbar={this.state.inlineToolbar}
           onSave={options => console.log("Save triggered", options)}
           onCancel={() => console.log("Cancel triggered")}
           onChange={this.handleChange}

@@ -31,6 +31,7 @@ type Props = {
   autoFocus?: boolean,
   readOnly?: boolean,
   toc?: boolean,
+  inlineToolbar?: boolean,
   dark?: boolean,
   schema?: Schema,
   theme?: Object,
@@ -258,6 +259,7 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
       toc,
       pretitle,
       placeholder,
+      inlineToolbar,
       onSave,
       uploadImage,
       onSearchLink,
@@ -294,6 +296,7 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
                 <Toolbar value={this.state.editorValue} editor={this.editor} />
               )}
             {!readOnly &&
+              inlineToolbar !== false &&
               this.editor && (
                 <BlockInsert
                   editor={this.editor}

@@ -44,6 +44,10 @@ document automatically.
 
 With `toc` set to `true` the editor will display a table of contents for headings in the document. This is particularly useful for larger documents and allows quick jumping to key sections.
 
+#### `inlineToolbar`
+
+With `inlineToolbar` set to `false` the editor will _not_ show the full-width inline toolbar.
+
 #### `plugins`
 
 Allows additional [Slate plugins](https://github.com/ianstormtaylor/slate/blob/master/docs/general/plugins.md) to be passed to the underlying Slate editor.
