@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import { Mark } from "slate";
+import { Mark, Editor } from "slate";
 import InlineCode from "./components/InlineCode";
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
   mark: Mark,
 };
 
-export default function renderMark(props: Props) {
+function renderMark(props: Props, editor: Editor, next: Function) {
   switch (props.mark.type) {
     case "bold":
       return <strong>{props.children}</strong>;
@@ -20,8 +20,11 @@ export default function renderMark(props: Props) {
       return <u>{props.children}</u>;
     case "deleted":
       return <del>{props.children}</del>;
-    case "added":
+    case "inserted":
       return <mark>{props.children}</mark>;
     default:
+      return next();
   }
 }
+
+export default { renderMark };

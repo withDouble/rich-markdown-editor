@@ -6,6 +6,7 @@ A React and [Slate](https://github.com/ianstormtaylor/slate) based editor that p
 The editor is WYSIWYG and includes many formatting tools whilst retaining the ability to write markdown
 shortcuts inline and output Markdown.
 
+> Note: This project is not attempting to be an all-purpose editor. If you wish to heavily customize the design, layout, or toolbars please fork the project.
 
 ## Usage
 
@@ -21,6 +22,10 @@ See a working example in the [example directory](/example).
 
 
 ### Props
+
+#### `id`
+
+A unique id for this editor, used to persist settings such as collapsed headings. If no `id` is passed then the editor will default to using the location pathname.
 
 #### `defaultValue`
 
@@ -39,6 +44,10 @@ With `readOnly` set to `false` the editor is optimized for composition. When `tr
 
 When set `true` together with `readOnly` set to `false`, focus at the
 document automatically.
+
+#### `spellCheck`
+
+Set to false to prevent spellchecking – defaults to true.
 
 #### `toc`
 
@@ -147,12 +156,11 @@ import { history } from "react-router";
 
 #### `renderNode`
 
-This callback allows overriding of the [inbuilt renderNode](https://github.com/outline/rich-markdown-editor/blob/master/src/nodes.js) – if a component is returned from the callback then it will be used instead of the default implementation. See the [Slate documentation](https://docs.slatejs.org/guides/rendering#nodes-and-marks) for an example.
+See the [Slate documentation](https://docs.slatejs.org/guides/rendering#nodes-and-marks) for an example.  There is an [inbuilt renderNode](https://github.com/outline/rich-markdown-editor/blob/master/src/nodes.js) implemented as a plugin.
 
-#### `renderPlaceholder`
+#### `getLinkComponent(Node)`
 
-This callback allows overriding of the [inbuilt renderPlaceholder](https://github.com/outline/rich-markdown-editor/blob/master/src/index.js) – if a callback is provided then it will be used instead of the default implementation. See the [Slate documentation](https://docs.slatejs.org/guides/rendering#placeholders) for an example.
-
+This callback allows links to request an alternative component to display instead of an inline link. Given a link node return `undefined` for no replacement or a valid React component to replace the standard link display. This is particularly useful for "embeds".
 
 
 ## Contributing

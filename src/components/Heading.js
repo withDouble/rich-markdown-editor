@@ -1,34 +1,29 @@
 // @flow
 import * as React from "react";
 import styled from "styled-components";
-import { Document } from "slate";
+import { CollapsedIcon } from "outline-icons";
 import type { SlateNodeProps } from "../types";
 import headingToSlug from "../lib/headingToSlug";
-import Placeholder from "./Placeholder";
 import CopyToClipboard from "./CopyToClipboard";
 
 type Props = SlateNodeProps & {
-  component: string,
-  className: string,
-  placeholder: string,
+  component: "h1" | "h2" | "h3" | "h4" | "h5" | "h6",
   hasPretitle: boolean,
+  className: string,
 };
 
 function Heading(props: Props) {
   const {
-    parent,
-    placeholder,
     node,
     editor,
     readOnly,
     children,
     component = "h1",
-    className,
     attributes,
+    className,
   } = props;
-  const parentIsDocument = parent instanceof Document;
-  const firstHeading = parentIsDocument && parent.nodes.first() === node;
-  const showPlaceholder = placeholder && firstHeading && !node.text;
+
+  const firstNode = editor.value.document.nodes.first() === node;
   const slugish = headingToSlug(editor.value.document, node);
   const showHash = readOnly && !!slugish;
   const Component = component;
@@ -36,19 +31,21 @@ function Heading(props: Props) {
   const title = node.text.trim();
   const startsWithPretitleAndSpace =
     pretitle && title.match(new RegExp(`^${pretitle}\\s`));
-  const linkToHeading = `${window.location.origin}${
-    window.location.pathname
-  }#${slugish}`;
+  const pathToHeading = `${window.location.pathname}#${slugish}`;
+  const collapsed = node.data.get("collapsed");
 
   return (
     <Component {...attributes} className={className}>
       <HiddenAnchor id={slugish} />
+      <CollapseToggle
+        onClick={() => editor.toggleContentBelow(node)}
+        contentEditable={false}
+        collapsed={collapsed}
+        disabled={firstNode}
+      >
+        <CollapsedIcon />
+      </CollapseToggle>
       <Wrapper hasPretitle={startsWithPretitleAndSpace}>{children}</Wrapper>
-      {showPlaceholder && (
-        <Placeholder contentEditable={false}>
-          {editor.props.titlePlaceholder}
-        </Placeholder>
-      )}
       {showHash && (
         <Anchor
           name={slugish}
@@ -56,7 +53,7 @@ function Heading(props: Props) {
             editor.props.onShowToast &&
             editor.props.onShowToast("Link copied to clipboard")
           }
-          text={linkToHeading}
+          text={`${window.location.origin}${pathToHeading}`}
         >
           <span>#</span>
         </Anchor>
@@ -64,6 +61,29 @@ function Heading(props: Props) {
     </Component>
   );
 }
+
+const CollapseToggle = styled.a`
+  opacity: ${props => (props.disabled ? "0" : "1")};
+  pointer-events: ${props => (props.disabled ? "none" : "all")};
+  visibility: ${props => (props.collapsed ? "visible" : "hidden")};
+  user-select: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+
+  svg {
+    ${props => props.collapsed && "transform: rotate(-90deg);"};
+    fill: ${props =>
+      props.collapsed ? props.theme.text : props.theme.placeholder};
+    transition: transform 100ms ease-in-out;
+  }
+
+  &:hover {
+    svg {
+      fill: ${props => props.theme.text};
+    }
+  }
+`;
 
 const Wrapper = styled.div`
   display: inline;
@@ -83,9 +103,16 @@ const Anchor = styled(CopyToClipboard)`
 `;
 
 export const StyledHeading = styled(Heading)`
+  display: flex;
+  align-items: center;
   position: relative;
+  margin-left: -24px;
 
   &:hover {
+    ${CollapseToggle} {
+      visibility: visible;
+    }
+
     ${Anchor} {
       color: ${props => props.theme.placeholder};
       visibility: visible;

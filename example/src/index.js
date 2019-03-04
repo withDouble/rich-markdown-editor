@@ -12,10 +12,18 @@ const exampleText = `
 This is example content. It is persisted between reloads in localStorage.
 `;
 const defaultValue = savedText || exampleText;
+
+class GoogleEmbed extends React.Component<*> {
+  render() {
+    const { attributes, node } = this.props;
+    return <p {...attributes}>Google Embed ({node.data.get("href")})</p>;
+  }
+}
+
 class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
   state = {
     readOnly: false,
-    dark: false,
+    dark: localStorage.getItem("dark") === "enabled",
     inlineToolbar: true,
   };
 
@@ -24,7 +32,9 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
   };
 
   handleToggleDark = () => {
-    this.setState({ dark: !this.state.dark });
+    const dark = !this.state.dark;
+    this.setState({ dark });
+    localStorage.setItem("dark", dark ? "enabled" : "disabled");
   };
 
   handleToggleInlineToolbar = () => {
@@ -36,6 +46,9 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
   }, 250);
 
   render() {
+    const { body } = document;
+    if (body) body.style.backgroundColor = this.state.dark ? "#181A1B" : "#FFF";
+
     return (
       <div style={{ marginTop: "60px" }}>
         <p>
@@ -52,6 +65,7 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
           </button>
         </p>
         <Editor
+          id="example"
           readOnly={this.state.readOnly}
           defaultValue={defaultValue}
           inlineToolbar={this.state.inlineToolbar}
@@ -74,8 +88,13 @@ class Example extends React.Component<*, { readOnly: boolean, dark: boolean }> {
 
             // Delay to simulate time taken to upload
             return new Promise(resolve => {
-              setTimeout(() => resolve(""), 3000);
+              setTimeout(() => resolve("http://lorempixel.com/400/200/"), 1500);
             });
+          }}
+          getLinkComponent={node => {
+            if (node.data.get("href").match(/google/)) {
+              return GoogleEmbed;
+            }
           }}
           dark={this.state.dark}
           autoFocus

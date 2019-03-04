@@ -34,8 +34,8 @@ type State = {
 @keydown
 class LinkToolbar extends React.Component<Props, State> {
   wrapper: ?HTMLElement;
-  input: HTMLInputElement;
-  firstDocument: HTMLElement;
+  input: ?HTMLInputElement;
+  firstDocument: ?HTMLElement;
   originalValue: string = "";
   state = {
     isEditing: false,
@@ -84,7 +84,7 @@ class LinkToolbar extends React.Component<Props, State> {
 
     // otherwise, we're clicking outside
     ev.preventDefault();
-    this.save(this.input.value);
+    this.save(this.input ? this.input.value : "");
   };
 
   search = async (term: string) => {
@@ -163,10 +163,12 @@ class LinkToolbar extends React.Component<Props, State> {
   };
 
   openLink = (ev: SyntheticMouseEvent<*>) => {
-    const href = this.props.link.data.get("href");
-    if (this.props.editor.props.onClickLink) {
+    const { link, editor } = this.props;
+    const href = link.data.get("href");
+
+    if (editor.props.onClickLink) {
       ev.preventDefault();
-      this.props.editor.props.onClickLink(href);
+      editor.props.onClickLink(href);
     } else {
       window.open(href, "_blank");
     }
@@ -176,15 +178,13 @@ class LinkToolbar extends React.Component<Props, State> {
     const { editor, link } = this.props;
     href = href.trim();
 
-    editor.change(change => {
-      if (href) {
-        change.setNodeByKey(link.key, { type: "link", data: { href } });
-      } else if (link) {
-        change.unwrapInlineByKey(link.key);
-      }
-      change.deselect();
-      this.props.onBlur();
-    });
+    if (href) {
+      editor.setNodeByKey(link.key, { type: "link", data: { href } });
+    } else if (link) {
+      editor.unwrapInlineByKey(link.key);
+    }
+    editor.deselect();
+    this.props.onBlur();
   };
 
   setFirstResultRef = (ref: *) => {
@@ -203,7 +203,7 @@ class LinkToolbar extends React.Component<Props, State> {
       <span ref={this.setWrapperRef}>
         <LinkEditor>
           <Input
-            innerRef={ref => (this.input = ref)}
+            ref={ref => (this.input = ref)}
             defaultValue={href}
             placeholder="Search or paste a link…"
             onKeyDown={this.onKeyDown}
@@ -231,7 +231,7 @@ class LinkToolbar extends React.Component<Props, State> {
             >
               {this.state.results.map((result, index) => (
                 <LinkSearchResult
-                  innerRef={ref => index === 0 && this.setFirstResultRef(ref)}
+                  ref={ref => index === 0 && this.setFirstResultRef(ref)}
                   title={result.title}
                   key={result.url}
                   onClick={ev => this.selectSearchResult(ev, result.url)}

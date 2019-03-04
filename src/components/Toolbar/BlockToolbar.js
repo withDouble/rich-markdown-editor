@@ -15,11 +15,7 @@ import {
   TodoListIcon,
 } from "outline-icons";
 import getDataTransferFiles from "../../lib/getDataTransferFiles";
-import Flex from "../Flex";
 import type { SlateNodeProps, Theme } from "../../types";
-
-import { fadeIn } from "../../animations";
-import { splitAndInsertBlock, insertImageFile } from "../../changes";
 import ToolbarButton from "./ToolbarButton";
 
 type Props = SlateNodeProps & {
@@ -32,8 +28,8 @@ type Options = {
 };
 
 class BlockToolbar extends React.Component<Props> {
-  bar: HTMLDivElement;
-  file: HTMLInputElement;
+  bar: ?HTMLDivElement;
+  file: ?HTMLInputElement;
 
   componentDidMount() {
     window.addEventListener("click", this.handleOutsideMouseClick);
@@ -61,13 +57,11 @@ class BlockToolbar extends React.Component<Props> {
     ev.preventDefault();
     ev.stopPropagation();
 
-    this.props.editor.change(change =>
-      change.setNodeByKey(this.props.node.key, {
-        type: "paragraph",
-        text: "",
-        isVoid: false,
-      })
-    );
+    this.props.editor.setNodeByKey(this.props.node.key, {
+      type: "paragraph",
+      text: "",
+      isVoid: false,
+    });
   }
 
   insertBlock = (
@@ -76,21 +70,20 @@ class BlockToolbar extends React.Component<Props> {
   ) => {
     const { editor } = this.props;
 
-    editor.change(change => {
-      change
-        .collapseToEndOf(this.props.node)
-        .call(splitAndInsertBlock, options)
-        .removeNodeByKey(this.props.node.key)
-        .collapseToEnd();
+    editor
+      .moveToEndOfNode(this.props.node)
+      .splitAndInsertBlock(options)
+      .removeNodeByKey(this.props.node.key)
+      .moveToEnd();
 
-      if (cursorPosition === "before") change.collapseToStartOfPreviousBlock();
-      if (cursorPosition === "after") change.collapseToStartOfNextBlock();
-      return change.focus();
-    });
+    if (cursorPosition === "before") editor.moveToStartOfPreviousBlock();
+    if (cursorPosition === "after") editor.moveToStartOfNextBlock();
+    return editor.focus();
   };
 
   handleClickBlock = (ev: SyntheticEvent<*>, type: string) => {
     ev.preventDefault();
+    ev.stopPropagation();
 
     switch (type) {
       case "heading1":
@@ -128,7 +121,7 @@ class BlockToolbar extends React.Component<Props> {
 
   onPickImage = () => {
     // simulate a click on the file upload input element
-    this.file.click();
+    if (this.file) this.file.click();
   };
 
   onImagePicked = async (ev: SyntheticInputEvent<*>) => {
@@ -137,7 +130,7 @@ class BlockToolbar extends React.Component<Props> {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      editor.change(change => change.call(insertImageFile, file, editor));
+      editor.insertImageFile(file);
     }
   };
 
@@ -158,17 +151,14 @@ class BlockToolbar extends React.Component<Props> {
   };
 
   render() {
-    const { editor, attributes, node } = this.props;
+    const { editor, attributes } = this.props;
     const hasImageUpload = !!editor.props.uploadImage;
 
-    const active =
-      editor.value.isFocused && editor.value.selection.hasEdgeIn(node);
-
     return (
-      <Bar active={active} {...attributes} ref={ref => (this.bar = ref)}>
+      <Bar {...attributes} ref={ref => (this.bar = ref)}>
         <HiddenInput
           type="file"
-          innerRef={ref => (this.file = ref)}
+          ref={ref => (this.file = ref)}
           onChange={this.onImagePicked}
           accept="image/*"
         />
@@ -196,9 +186,9 @@ const Separator = styled.div`
   margin-left: 10px;
 `;
 
-const Bar = styled(Flex)`
+const Bar = styled.div`
+  display: flex;
   z-index: 100;
-  animation: ${fadeIn} 150ms ease-in-out;
   position: relative;
   align-items: center;
   background: ${props => props.theme.blockToolbarBackground};
